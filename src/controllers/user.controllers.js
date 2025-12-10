@@ -119,3 +119,21 @@ export const ctrlDeleteUser = async (req, res) => {
     res.status(500).json({ error: "No se pudo eliminar el usuario" });
   }
 };
+
+// ───────── OBTENER USUARIO AUTENTICADO ─────────
+export const ctrlGetMe = async (req, res) => {
+  try {
+    // req.user viene del verifyToken
+    const user = await UserModel.findById(req.user.id).select("-password");
+
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    res.status(200).json({
+      message: "Usuario autenticado",
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Error obteniendo usuario:", error);
+    res.status(500).json({ error: "No se pudo obtener el usuario" });
+  }
+};

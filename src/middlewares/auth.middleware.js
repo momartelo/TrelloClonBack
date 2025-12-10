@@ -8,6 +8,7 @@ export const verifyToken = async (req, res, next) => {
   const token = header.split(" ")[1]; // "Bearer TOKEN"
   try {
     const decoded = await verifyJWT(token);
+    console.log("👉 TOKEN DECODED:", decoded); // <--- AQUÍ
     req.user = decoded; // disponible en controladores
     next();
   } catch (error) {

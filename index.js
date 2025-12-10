@@ -9,6 +9,7 @@ import { authRouter } from "./src/routes/auth.routes.js";
 import { startConnection } from "./src/settings/database.js";
 import { avatarsRouter } from "./src/routes/avatars.routes.js";
 import { errorHandler } from "./src/middlewares/error.middleware.js";
+import { boardsRouter } from "./src/routes/boards.routes.js";
 
 const app = express();
 
@@ -34,10 +35,11 @@ app.use(express.static(publicPath));
 
 app.get("/", (req, res) => res.send("API funcionando"));
 
-app.use(errorHandler);
-
 app.use("/api/auth", authRouter);
 app.use("/api/avatars", avatarsRouter);
+app.use("/api/boards", boardsRouter);
+
+app.use(errorHandler);
 
 app.listen(config.port, async () => {
   await startConnection({
