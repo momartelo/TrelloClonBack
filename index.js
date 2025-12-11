@@ -4,12 +4,12 @@ import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
-import { config } from "./src/settings/config.js";
 import { authRouter } from "./src/routes/auth.routes.js";
-import { startConnection } from "./src/settings/database.js";
 import { avatarsRouter } from "./src/routes/avatars.routes.js";
-import { errorHandler } from "./src/middlewares/error.middleware.js";
 import { boardsRouter } from "./src/routes/boards.routes.js";
+import { errorHandler } from "./src/middlewares/error.middleware.js";
+import { listsRouter } from "./src/routes/lists.routes.js";
+import { cardsRouter } from "./src/routes/cards.routes.js";
 
 const app = express();
 
@@ -38,13 +38,9 @@ app.get("/", (req, res) => res.send("API funcionando"));
 app.use("/api/auth", authRouter);
 app.use("/api/avatars", avatarsRouter);
 app.use("/api/boards", boardsRouter);
+app.use("/api/lists", listsRouter);
+app.use("/api/cards", cardsRouter);
 
 app.use(errorHandler);
 
-app.listen(config.port, async () => {
-  await startConnection({
-    uri: config.mongo,
-    database: config.database,
-  });
-  console.log("Server is running on port: http://localhost:" + config.port);
-});
+export { app };

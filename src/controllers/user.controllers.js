@@ -20,6 +20,14 @@ export const ctrlCreateUser = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error creando usuario:", error);
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        error: "Duplicado",
+        details: "El email o el username ya está registrado",
+      });
+    }
+
     res.status(400).json({
       error: "No se pudo crear el usuario",
       details: error.message,
@@ -62,18 +70,31 @@ export const ctrlLoginUser = async (req, res) => {
 };
 
 // ───────── ACTUALIZAR USUARIO ─────────
+import mongoose from "mongoose";
+
 export const ctrlUpdateUser = async (req, res) => {
   const userId = req.params.id;
+
   try {
-    if (req.user.id !== userId && req.user.role !== "admin")
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    if (req.user.id !== userId && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ error: "No tienes permisos para esta acción" });
+    }
 
     const user = await UserModel.findById(userId);
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
-    user.set(req.body);
+    // Campos permitidos
+    const allowed = ["username", "email", "password", "gender"];
+    for (const field of allowed) {
+      if (req.body[field] !== undefined) user[field] = req.body[field];
+    }
+
     await user.save();
 
     res.status(200).json({
@@ -88,6 +109,14 @@ export const ctrlUpdateUser = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error actualizando usuario:", error);
+
+    if (error.code === 11000) {
+      return res.status(400).json({
+        error: "Duplicado",
+        details: "El email o username ya está registrado",
+      });
+    }
+
     res.status(500).json({ error: "No se pudo actualizar el usuario" });
   }
 };
@@ -95,11 +124,17 @@ export const ctrlUpdateUser = async (req, res) => {
 // ───────── ELIMINAR USUARIO ─────────
 export const ctrlDeleteUser = async (req, res) => {
   const userId = req.params.id;
+
   try {
-    if (req.user.id !== userId && req.user.role !== "admin")
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    if (req.user.id !== userId && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ error: "No tienes permisos para esta acción" });
+    }
 
     const user = await UserModel.findById(userId);
     if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
